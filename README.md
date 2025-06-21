@@ -2,7 +2,8 @@
 
 ![Language](https://img.shields.io/badge/Language-Bash-blue.svg)
 ![Environment](https://img.shields.io/badge/Environment-Docker-brightgreen.svg)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+![License](https://img.shields.io/badge/License-GPLv3-blue.svg)
+
 
 > **Robust bilingual installer** for [AgenticSeek (Fosowl's Fork)](https://github.com/Fosowl/agenticSeek)  
 > Automates installation, configuration and management on Linux servers  
