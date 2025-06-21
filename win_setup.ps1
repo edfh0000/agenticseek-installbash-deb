@@ -1,6 +1,6 @@
 # =================================================================================================
 #
-#    INSTALADOR Y GESTOR AVANZADO DE AGENTICSEEK para WINDOWS (v12.3 - ASCII Limpio)
+#    INSTALADOR Y GESTOR AVANZADO DE AGENTICSEEK para WINDOWS (v1.2.4 - Final y Corregido)
 #
 # =================================================================================================
 
@@ -118,9 +118,6 @@ function Set-LanguageStrings {
     }
 }
 
-# El resto del script es idéntico y funcionará sin cambios...
-# (El código completo de las funciones Show-ManagementMenu y Start-Installation va aquí)
-
 # --- FUNCIÓN DEL MENÚ DE GESTIÓN ---
 function Show-ManagementMenu {
     Set-Location $RepoDir
@@ -160,7 +157,17 @@ function Start-Installation {
     Write-Host "  $($lang.MSG_CONFIG_FAST)"; Write-Host "  $($lang.MSG_CONFIG_CUSTOM)"; Write-Host ""
     $setup_choice = Read-Host "$($lang.MSG_PROMPT_CHOICE) [1]"
     $FrontendPort = 39899; $BackendPort = 7777; $SearxngBaseUrl = "https://paulgo.io"
-    $ApiKeys = @{ OPENAI_API_KEY = 'xxxxx'; DEEPSEEK_API_KEY = 'xxxxx'; OPENROUTER_API_KEY = 'xxxxx'; TOGETHER_API_KEY = 'xxxxx'; GOOGLE_API_KEY = 'xxxxx'; ANTHROPIC_API_KEY = 'xxxxx'; HUGGINGFACE_API_KEY = 'xxxxx'; DSK_DEEPSEEK_API_KEY= 'xxxxx' }
+    $ApiKeys = [ordered]@{
+        OPENAI_API_KEY      = 'xxxxx'
+        OPENROUTER_API_KEY  = 'xxxxx'
+        TOGETHER_API_KEY    = 'xxxxx'
+        GOOGLE_API_KEY      = 'xxxxx'
+        DEEPSEEK_API_KEY    = 'xxxxx'
+        HUGGINGFACE_API_KEY = 'xxxxx'
+        ANTHROPIC_API_KEY   = 'xxxxx'
+        DSK_DEEPSEEK_API_KEY= 'xxxxx'
+    }
+
     if ($setup_choice -eq "2") {
       Clear-Host
       Write-Host "================================================="; Write-Host "  $($lang.CUSTOM_TITLE)"; Write-Host "================================================="; Write-Host ""
@@ -168,8 +175,15 @@ function Start-Installation {
       $custom_backend_port = Read-Host "$($lang.CUSTOM_PROMPT_BACKEND_PORT) [7777]"; if ($custom_backend_port) { $BackendPort = $custom_backend_port }
       $custom_searxng = Read-Host "$($lang.CUSTOM_PROMPT_SEARXNG) [https://paulgo.io]"; if ($custom_searxng) { $SearxngBaseUrl = $custom_searxng }
       Write-Host ""; Write-Host "$($lang.MSG_PROMPT_API_KEYS)"; Write-Host "-------------------------------------------------"
-      $ApiKeys.Keys | ForEach-Object { $keyName = $_; $custom_key = Read-Host "$keyName"; if ($custom_key) { $ApiKeys[$keyName] = $custom_key } }
+      
+      # Bucle de API Keys corregido
+      $tempKeys = $ApiKeys.Clone()
+      foreach ($keyName in $tempKeys.Keys) {
+          $custom_key = Read-Host "$keyName"
+          if ($custom_key) { $ApiKeys[$keyName] = $custom_key }
+      }
     }
+
     Clear-Host; Write-Host ""; Write-Host "$($lang.MSG_STARTING)"; Write-Host ""
     Write-Host "[$($lang.MSG_STEP) 1/8] $($lang.MSG_PREREQ_CHECK)"
     if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { Write-Host "$($lang.MSG_DOCKER_FAIL)"; exit 1 }
@@ -181,8 +195,9 @@ function Start-Installation {
         Write-Host "  - $($lang.MSG_CLONE_INCOMPLETE)"; if (Test-Path $RepoDir) { Remove-Item -Path $RepoDir -Recurse -Force }; git clone https://github.com/Fosowl/agenticSeek.git $RepoDir
     } else { Write-Host "  - $($lang.MSG_CLONE_OK)" }
     Set-Location $RepoDir
+    
     Write-Host "[$($lang.MSG_STEP) 4/8] $($lang.MSG_ENV)"
-    @"
+    $envContent = @"
 FRONTEND_PORT=$FrontendPort
 BACKEND_PORT=$BackendPort
 SEARXNG_BASE_URL="$SearxngBaseUrl"
@@ -196,9 +211,12 @@ GOOGLE_API_KEY='$($ApiKeys.GOOGLE_API_KEY)'
 ANTHROPIC_API_KEY='$($ApiKeys.ANTHROPIC_API_KEY)'
 HUGGINGFACE_API_KEY='$($ApiKeys.HUGGINGFACE_API_KEY)'
 DSK_DEEPSEEK_API_KEY='$($ApiKeys.DSK_DEEPSEEK_API_KEY)'
-"@ | Set-Content -Path .\.env
+"@
+    $envContent | Set-Content -Path .\.env -Encoding utf8
+
     Write-Host "[$($lang.MSG_STEP) 5/8] $($lang.MSG_DOCKER_YML)"
-    @"
+    # Plantilla con marcadores de posición
+    $dockerComposeTemplate = @"
 version: '3.8'
 services:
   redis:
@@ -216,9 +234,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.frontend
     ports:
-      - "$FrontendPort:3000"
+      - "__FRONTEND_PORT__:3000"
     environment:
-      - REACT_APP_BACKEND_URL=http://localhost:$BackendPort
+      - REACT_APP_BACKEND_URL=http://localhost:__BACKEND_PORT__
     networks:
       - agentic-seek-net
     depends_on:
@@ -231,22 +249,11 @@ services:
     shm_size: '2gb'
     command: python3 api.py --no-sandbox --disable-dev-shm-usage
     ports:
-      - "$BackendPort`:`$BackendPort"
+      - "__BACKEND_PORT__:__BACKEND_PORT__"
     volumes:
       - ./:/app
-    environment:
-      SEARXNG_URL: `$env:SEARXNG_BASE_URL
-      REDIS_URL: `$env:REDIS_BASE_URL
-      WORK_DIR: /app
-      BACKEND_PORT: `$env:BACKEND_PORT
-      OPENAI_API_KEY: `$env:OPENAI_API_KEY
-      DEEPSEEK_API_KEY: `$env:DEEPSEEK_API_KEY
-      OPENROUTER_API_KEY: `$env:OPENROUTER_API_KEY
-      TOGETHER_API_KEY: `$env:TOGETHER_API_KEY
-      GOOGLE_API_KEY: `$env:GOOGLE_API_KEY
-      ANTHROPIC_API_KEY: `$env:ANTHROPIC_API_KEY
-      HUGGINGFACE_API_KEY: `$env:HUGGINGFACE_API_KEY
-      DSK_DEEPSEEK_API_KEY: `$env:DSK_DEEPSEEK_API_KEY
+    env_file:
+      - .env
     depends_on:
       - redis
     networks:
@@ -256,9 +263,14 @@ volumes:
 networks:
   agentic-seek-net:
     driver: bridge
-"@ | Set-Content -Path .\docker-compose.yml
+"@
+    # Reemplazo de marcadores de posición
+    $finalDockerCompose = $dockerComposeTemplate.Replace("__FRONTEND_PORT__", $FrontendPort).Replace("__BACKEND_PORT__", $BackendPort)
+    $finalDockerCompose | Set-Content -Path .\docker-compose.yml -Encoding utf8
+
     Write-Host "[$($lang.MSG_STEP) 6/8] $($lang.MSG_DOCKER_BUILD)"; docker compose build --no-cache
     Write-Host "[$($lang.MSG_STEP) 7/8] $($lang.MSG_DOCKER_UP)"; docker compose up -d
+    
     New-Item -Path $FlagFile -ItemType File | Out-Null
     Write-Host ""; Write-Host "=========================================================================="; Write-Host "  $($lang.MSG_SUCCESS_TITLE)"; Write-Host "=========================================================================="
     Write-Host ""; Write-Host "  $($lang.MSG_SUCCESS_WEB)"; Write-Host "  >> http://localhost:$FrontendPort"; Write-Host ""
