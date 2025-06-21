@@ -7,7 +7,8 @@
 
 > **Robust bilingual installer** for [AgenticSeek (Fosowl's Fork)](https://github.com/Fosowl/agenticSeek)  
 > Automates installation, configuration and management on Linux servers  
-> Result of intensive debugging - handles common pitfalls seamlessly  
+> Result of intensive debugging - handles common pitfalls seamlessly
+> Made by Eddy F. T.
 
 ---
 
