@@ -108,12 +108,12 @@ Before running the script, you must manually install the following tools:
     By default, PowerShell might block running local scripts. If you get an error, you may need to change the execution policy for the current session. Run this command in your Administrator PowerShell window:
     ```powershell
     Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/edfh0000/agenticseek-installbash-deb/refs/heads/main/win_setup.ps1" -OutFile "setup.ps1"
     ```
 
 3.  **Navigate to the Script and Run It:**
     Go to the directory where you saved `setup.ps1` and execute it:
     ```powershell
-    cd C:\path\to\your\script
     .\setup.ps1
     ```
 
