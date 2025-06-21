@@ -84,3 +84,41 @@ Backend: TCP port 7777 (or your custom port)
 
 Set source to 0.0.0.0/0 (anywhere)
 
+# 🚀 Windows Powershell version
+
+## Windows PowerShell Version
+
+This repository also includes an advanced installer and manager script specifically for Windows environments (`setup.ps1`).
+
+### Prerequisites
+
+Before running the script, you must manually install the following tools:
+
+1.  **Docker Desktop for Windows:** The official way to run Docker on Windows. Download it from the [Docker Hub](https://hub.docker.com/editions/community/docker-ce-desktop-windows/). **Make sure it is running** before you execute the script.
+2.  **Git for Windows:** Provides the `git` command line tool. Download it from [git-scm.com](https://git-scm.com/).
+
+### Usage Guide
+
+1.  **Open PowerShell as Administrator:**
+    -   Click the Start Menu.
+    -   Type "PowerShell".
+    -   Right-click on "Windows PowerShell" and select **"Run as administrator"**.
+
+2.  **Allow Script Execution (if needed):**
+    By default, PowerShell might block running local scripts. If you get an error, you may need to change the execution policy for the current session. Run this command in your Administrator PowerShell window:
+    ```powershell
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+    ```
+
+3.  **Navigate to the Script and Run It:**
+    Go to the directory where you saved `setup.ps1` and execute it:
+    ```powershell
+    cd C:\path\to\your\script
+    .\setup.ps1
+    ```
+
+4.  **Follow On-Screen Instructions:**
+    The script will guide you through the same "Quick Install" or "Custom Setup" process as the Linux version. The firewall rules for the chosen ports will be created automatically in Windows Defender Firewall.
+
+5.  **Access the Application:**
+    Once the installation is complete, you can access the web interface at `http://localhost:<Your-Frontend-Port>`.
