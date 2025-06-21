@@ -43,7 +43,7 @@
 
 ### Step 1: Download the script
 bash
-wget -O setup.sh https://raw.githubusercontent.com/Fosowl/agenticSeek/main/setup.sh
+wget -O setup.sh https://raw.githubusercontent.com/edfh0000/agenticseek-installbash-deb/refs/heads/main/setup.sh
 ## Step 2: Make executable
 bash
 chmod +x setup.sh
