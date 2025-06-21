@@ -40,7 +40,7 @@
 ## 🛠️ Installation & Usage
 
 ### Step 1: Download the script
-```bash
+bash
 wget -O setup.sh <URL_TO_YOUR_SCRIPT_FILE>
 Step 2: Make executable
 bash
